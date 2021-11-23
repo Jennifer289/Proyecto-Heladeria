@@ -11,22 +11,25 @@ namespace BL.Heladeria
    
     public class ClienteBL
     {
+        Contexto _contexto;
 
-        BindingList<Cliente> ListaCliente { get; set; }
+        public BindingList<Cliente> ListaCliente { get; set; }
 
         public ClienteBL()
         {
-             
+
+            _contexto = new Contexto();
             ListaCliente = new BindingList<Cliente>();
 
-            
         }
 
         public BindingList<Cliente> ObtenerCliente()
         {
-            
-            
+            _contexto.Clientes.Load();
+            ListaCliente = _contexto.Clientes.Local.ToBindingList();
+
             return ListaCliente;
+  
         }
 
         public Resultado  GuardarCliente(Cliente cliente)
@@ -36,10 +39,8 @@ namespace BL.Heladeria
             {
                 return resultado2;
             }
-            if (cliente.id == 0)
-            {
-                cliente.id = ListaCliente.Max(item => item.id) + 1;
-            }
+
+            _contexto.SaveChanges();
             resultado2.Exitoso = true;
             return resultado2;
         }
@@ -57,6 +58,7 @@ namespace BL.Heladeria
                if (cliente.id == id)
                 {
                     ListaCliente.Remove(cliente);
+                    _contexto.SaveChanges();
                     return true;
                 }
             }
@@ -68,12 +70,21 @@ namespace BL.Heladeria
             var resultado = new Resultado();
             resultado.Exitoso = true;
 
+            if (cliente== null)
+            {
+                resultado.Mensaje = "Agregue un cliente valida";
+                resultado.Exitoso = false;
+
+                return resultado;
+            }
+
             if (string.IsNullOrEmpty(cliente.Nombre) == true)
             {
                 resultado.Mensaje = "Ingrese un nombre";
                 resultado.Exitoso = false;
             }
 
+           
 
 
             return resultado;
@@ -86,6 +97,8 @@ namespace BL.Heladeria
         public string Tel { get; set; }
         public string Email { get; set; }
         public bool Activo { get; set; }
+
+     
 
     }
 
